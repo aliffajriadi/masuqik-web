@@ -1,0 +1,112 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  password  String
+  phone     String?
+  role      String   @default("MEMBER") // MEMBER, ADMIN, SUPERADMIN
+  status    String   @default("ACTIVE") // ACTIVE, BLOCKED
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  orders             Order[]
+  adminActivityLogs AdminActivityLog[]
+}
+
+model Product {
+  id             String   @id @default(uuid())
+  panelProductId String?  @unique           // null for MANUAL products
+  source         String   @default("PANEL") // PANEL | MANUAL
+  name           String
+  category       String
+  priceRupiah    Int
+  priceWl        Int      @default(0)
+  currencyMode   String   @default("IDR")   // IDR, WL, BOTH
+  thumbnail      String?
+  description    String?                    // product description (manual only)
+  deliveryType   String   @default("AUTOMATIC") // AUTOMATIC, MANUAL
+  stockCount     Int      @default(0)
+  stockItems     String?                    // JSON array of stock strings (MANUAL source)
+  isActive       Boolean  @default(true)
+  isPopular      Boolean  @default(false)
+  markupPrice    Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  orders Order[]
+}
+
+model Order {
+  id           String   @id @default(uuid())
+  orderCode    String   @unique
+  userId       String?
+  guestEmail   String?
+  guestContact String?
+  productId    String
+  qty          Int      @default(1)
+  totalAmount  Int
+  status       String   @default("PENDING_PAYMENT") 
+  // PENDING_PAYMENT, PAID, COMPLETED, FAILED_STOCK, EXPIRED, FAILED, CANCELLED, REFUNDED
+  
+  paymentMethod String  @default("QRIS")
+  paymentRef    String? // external invoice / order id from PG
+  takenStocks   String? // JSON string storing array of stock items from panel /take endpoint
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user    User?   @relation(fields: [userId], references: [id])
+  product Product @relation(fields: [productId], references: [id])
+
+  paymentTransactions PaymentTransaction[]
+}
+
+model PaymentTransaction {
+  id                 String   @id @default(uuid())
+  orderId            String
+  gateway            String   @default("ANJAY")
+  invoiceId          String
+  status             String
+  rawCallbackPayload String? // JSON string of raw webhook payload
+  createdAt          DateTime @default(now())
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+}
+
+model Setting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+}
+
+model AdminActivityLog {
+  id        String   @id @default(uuid())
+  adminId   String
+  action    String
+  target    String?
+  details   String?
+  createdAt DateTime @default(now())
+
+  admin User @relation(fields: [adminId], references: [id])
+}
+
+model Banner {
+  id        String   @id @default(uuid())
+  title     String
+  imageUrl  String
+  targetUrl String?
+  isActive  Boolean  @default(true)
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

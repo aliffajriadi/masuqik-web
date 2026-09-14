@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Masuqik Store — Toko produk digital terpercaya. Beli proxy, voucher, dan top-up secara instant 24/7.">
+  <title><%= typeof title !== 'undefined' ? title : 'Masuqik Store — Toko Produk Digital' %></title>
+  <link rel="icon" type="image/png" href="/images/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+
+  <!-- Theme init BEFORE render (prevent flash) -->
+  <script>
+    (function() {
+      const saved = localStorage.getItem('masuqik_theme') || 'dark';
+      document.documentElement.setAttribute('data-theme', saved);
+    })();
+  </script>
+</head>
+<body>
+  <%- include('../partials/header') %>
+
+  <main>
+    <%- body %>
+  </main>
+
+  <%- include('../partials/footer') %>
+
+  <!-- Mobile Bottom Navigation -->
+  <nav class="mobile-bottom-nav" aria-label="Mobile Navigation">
+    <ul>
+      <li>
+        <a href="/" class="mobile-nav-item <%= typeof activePage !== 'undefined' && activePage === 'home' ? 'active' : '' %>" aria-label="Beranda">
+          <span class="nav-icon icon"><i data-lucide="home"></i></span>
+          <span class="nav-label">Beranda</span>
+        </a>
+      </li>
+      <li>
+        <a href="/#katalog" class="mobile-nav-item" aria-label="Katalog">
+          <span class="nav-icon icon"><i data-lucide="package"></i></span>
+          <span class="nav-label">Katalog</span>
+        </a>
+      </li>
+      <li>
+        <a href="/track" class="mobile-nav-item <%= typeof activePage !== 'undefined' && activePage === 'track' ? 'active' : '' %>" aria-label="Cek Order">
+          <span class="nav-icon icon"><i data-lucide="search"></i></span>
+          <span class="nav-label">Cek Order</span>
+        </a>
+      </li>
+    </ul>
+  </nav>
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script>
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // Sticky header shadow on scroll
+    const header = document.querySelector('.site-header');
+    if (header) {
+      window.addEventListener('scroll', () => {
+        header.classList.toggle('scrolled', window.scrollY > 10);
+      }, { passive: true });
+    }
+
+    // Theme Toggle
+    function toggleTheme() {
+      const html = document.documentElement;
+      const current = html.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      localStorage.setItem('masuqik_theme', next);
+    }
+  </script>
+</body>
+</html>

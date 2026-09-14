@@ -1,0 +1,74 @@
+<div style="display: grid; grid-template-columns: 350px 1fr; gap: 2rem;">
+  <!-- Form Tambah Banner -->
+  <div style="background: #ffffff; border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; box-shadow: var(--shadow-sm); height: fit-content;">
+    <h3 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 1rem;">Tambah Banner Baru</h3>
+    
+    <form action="/admin/banners" method="POST">
+      <div style="margin-bottom: 1rem;">
+        <label style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.35rem;">Judul Banner Promo:</label>
+        <input type="text" name="title" placeholder="Contoh: Promo Diskon 50%" style="width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: var(--radius-sm);" required>
+      </div>
+
+      <div style="margin-bottom: 1rem;">
+        <label style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.35rem;">URL / Link Gambar Banner:</label>
+        <input type="url" name="imageUrl" placeholder="https://domain.com/banner.jpg" style="width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: var(--radius-sm);" required>
+      </div>
+
+      <div style="margin-bottom: 1.25rem;">
+        <label style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.35rem;">Target URL Klik (Opsional):</label>
+        <input type="text" name="targetUrl" placeholder="/#katalog atau https://..." value="/#katalog" style="width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: var(--radius-sm);">
+      </div>
+
+      <button type="submit" class="btn-pill btn-primary" style="width: 100%; padding: 0.75rem;">Simpan Banner</button>
+    </form>
+  </div>
+
+  <!-- Tabel Daftar Banner -->
+  <div>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Preview</th>
+          <th>Judul</th>
+          <th>Target Link</th>
+          <th>Status</th>
+          <th>Aksi</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (banners.length === 0) { %>
+          <tr><td colspan="5" style="text-align: center; color: var(--text-muted);">Belum ada banner promo</td></tr>
+        <% } else { %>
+          <% banners.forEach(b => { %>
+            <tr>
+              <td style="width: 120px;">
+                <img src="<%= b.imageUrl %>" alt="<%= b.title %>" style="width: 100px; height: 50px; object-fit: cover; border-radius: 6px;">
+              </td>
+              <td><strong><%= b.title %></strong></td>
+              <td style="font-size: 0.8rem; color: var(--text-muted);"><%= b.targetUrl || '-' %></td>
+              <td>
+                <span style="padding: 0.25rem 0.6rem; border-radius: var(--radius-pill); font-size: 0.75rem; font-weight: 700; background: <%= b.isActive ? '#dcfce7; color:#166534;' : '#fee2e2; color:#991b1b;' %>">
+                  <%= b.isActive ? 'Aktif' : 'Non-Aktif' %>
+                </span>
+              </td>
+              <td>
+                <div style="display: flex; gap: 0.5rem;">
+                  <form action="/admin/banners/<%= b.id %>/toggle" method="POST">
+                    <button type="submit" class="btn-pill" style="padding: 0.35rem 0.7rem; font-size: 0.75rem; background: <%= b.isActive ? '#f1f5f9; color:#475569;' : '#00b4d8; color:#fff;' %>">
+                      <%= b.isActive ? 'Matikan' : 'Aktifkan' %>
+                    </button>
+                  </form>
+                  <form action="/admin/banners/<%= b.id %>/delete" method="POST" onsubmit="return confirm('Hapus banner ini?')">
+                    <button type="submit" class="btn-pill" style="padding: 0.35rem 0.7rem; font-size: 0.75rem; background: #fee2e2; color: #dc2626;">
+                      Hapus
+                    </button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+          <% }) %>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+</div>

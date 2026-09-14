@@ -1,0 +1,170 @@
+<div class="container" style="padding-top: 2.5rem; padding-bottom: 5rem;">
+  <div class="page-card" style="text-align: center;">
+
+    <!-- Status Badge -->
+    <span style="background: rgba(245,158,11,0.12); color: #fbbf24; border: 1px solid rgba(245,158,11,0.25); padding: 0.38rem 1.1rem; border-radius: var(--radius-pill); font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; display:inline-flex; align-items:center; gap:0.4rem;">
+      <i data-lucide="clock" style="width:13px;height:13px;"></i>
+      Menunggu Pembayaran
+    </span>
+
+    <h2 style="font-size: 1.4rem; font-weight: 800; margin-top: 1.25rem; margin-bottom: 0.35rem; color: var(--text-main);">
+      Scan QRIS untuk Membayar
+    </h2>
+    <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1.5rem; line-height: 1.6;">
+      ShopeePay · GoPay · OVO · Dana · BSI · BCA · m-Banking apapun
+    </p>
+
+    <!-- Countdown Timer -->
+    <div class="countdown-box">
+      <div class="countdown-label">
+        <i data-lucide="timer" style="width:12px;height:12px;"></i>
+        Sisa Waktu Pembayaran
+      </div>
+      <div id="countdownTimer" class="countdown-timer">10:00</div>
+      <div style="font-size: 0.72rem; color: #fca5a5; margin-top: 0.35rem; opacity: 0.9;">
+        Invoice otomatis dibatalkan jika waktu habis
+      </div>
+    </div>
+
+    <!-- QR Code Display -->
+    <div class="qr-wrapper">
+      <% if (typeof qrString !== 'undefined' && qrString) { %>
+        <img id="qrisImage"
+             src="https://api.qrserver.com/v1/create-qr-code/?size=260x260&data=<%= encodeURIComponent(qrString) %>"
+             alt="QRIS Payment Code"
+             style="width: 240px; height: 240px; border-radius: 8px; display: block; margin: 0 auto;">
+      <% } else if (typeof paymentUrl !== 'undefined' && paymentUrl) { %>
+        <img id="qrisImage"
+             src="https://api.qrserver.com/v1/create-qr-code/?size=260x260&data=<%= encodeURIComponent(paymentUrl) %>"
+             alt="QRIS Payment Code"
+             style="width: 240px; height: 240px; border-radius: 8px; display: block; margin: 0 auto;">
+      <% } %>
+      <div style="margin-top: 0.9rem; font-size: 0.7rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; display:flex; align-items:center; justify-content:center; gap:0.35rem;">
+        <i data-lucide="shield-check" style="width:12px;height:12px; color: #34d399;"></i>
+        All QRIS Supported
+      </div>
+    </div>
+
+    <!-- Order Summary -->
+    <div class="order-summary">
+      <div class="order-row">
+        <span class="order-key">Kode Order</span>
+        <span class="order-val order-code"><%= order.orderCode %></span>
+      </div>
+      <% if (order.productName) { %>
+      <div class="order-row">
+        <span class="order-key">Produk</span>
+        <span class="order-val" style="font-size:0.85rem; max-width:60%; text-align:right;"><%= order.productName %></span>
+      </div>
+      <% } %>
+      <div class="order-row">
+        <span class="order-key">Jumlah</span>
+        <span class="order-val"><%= order.qty %>x Item</span>
+      </div>
+      <% if (typeof platformFee !== 'undefined' && platformFee > 0) { %>
+      <div class="order-row">
+        <span class="order-key">Biaya Admin (Platform)</span>
+        <span class="order-val">Rp <%= platformFee.toLocaleString('id-ID') %></span>
+      </div>
+      <% } %>
+      <div class="order-row" style="border-top: 1px dashed var(--border); padding-top: 0.75rem; margin-top: 0.5rem;">
+        <span class="order-key" style="font-weight: 700;">Total Keseluruhan</span>
+        <span class="order-val" style="font-size: 1.1rem; color: var(--primary);">Rp <%= (typeof grandTotal !== 'undefined' ? grandTotal : order.totalAmount).toLocaleString('id-ID') %></span>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+      <a href="/track?orderCode=<%= order.orderCode %>" class="btn-pill btn-primary" style="padding: 0.9rem; font-size: 0.92rem; gap: 0.45rem;">
+        <i data-lucide="search" style="width:16px;height:16px;"></i>
+        Cek Status Pesanan
+      </a>
+      
+      <button onclick="cancelOrderManual()" class="btn-pill btn-ghost" style="padding: 0.9rem; font-size: 0.92rem; color: #ef4444; border: 1px solid rgba(239,68,68,0.3); gap: 0.45rem; background: rgba(239,68,68,0.05);">
+        <i data-lucide="x-circle" style="width:16px;height:16px;"></i>
+        Batalkan Pesanan
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  let timeLeft = 10 * 60;
+  const timerEl = document.getElementById('countdownTimer');
+  const orderCode = '<%= order.orderCode %>';
+  const invoiceCode = '<%= typeof invoiceCode !== "undefined" ? invoiceCode : "" %>';
+
+  // Save order to local storage for tracking history
+  try {
+    let orders = JSON.parse(localStorage.getItem('masuqik_orders') || '[]');
+    if (!orders.find(o => o.code === orderCode)) {
+      orders.unshift({
+        code: orderCode,
+        date: new Date().toISOString()
+      });
+      if (orders.length > 10) orders = orders.slice(0, 10);
+      localStorage.setItem('masuqik_orders', JSON.stringify(orders));
+    }
+  } catch(e) { console.error('Failed saving order history', e); }
+
+  const countdownInterval = setInterval(() => {
+    const mins = Math.floor(timeLeft / 60);
+    const secs = timeLeft % 60;
+    timerEl.innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+
+    if (timeLeft <= 120) {
+      timerEl.style.textShadow = '0 0 20px rgba(239,68,68,0.7)';
+    }
+
+    if (timeLeft <= 0) {
+      clearInterval(countdownInterval);
+      if (typeof statusInterval !== 'undefined') clearInterval(statusInterval);
+      timerEl.innerText = 'EXPIRED';
+
+      fetch('/checkout/cancel', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderCode, invoiceCode })
+      }).then(() => {
+        alert('Waktu pembayaran habis (10 menit). Invoice otomatis dibatalkan.');
+        window.location.href = '/track?orderCode=' + orderCode;
+      }).catch(() => {
+        window.location.href = '/track?orderCode=' + orderCode;
+      });
+    }
+
+    timeLeft--;
+  }, 1000);
+
+  // Poll order status to automatically redirect when paid
+  const statusInterval = setInterval(() => {
+    fetch('/checkout/status/' + orderCode)
+      .then(res => res.json())
+      .then(data => {
+        if (data.status === 'PAID' || data.status === 'COMPLETED') {
+          clearInterval(statusInterval);
+          clearInterval(countdownInterval);
+          window.location.href = '/track?orderCode=' + orderCode;
+        } else if (data.status === 'EXPIRED' || data.status === 'FAILED' || data.status === 'CANCELLED') {
+          clearInterval(statusInterval);
+          clearInterval(countdownInterval);
+          window.location.href = '/track?orderCode=' + orderCode;
+        }
+      })
+      .catch(err => console.error('Status check error:', err));
+  }, 3000);
+
+  function cancelOrderManual() {
+    if (confirm('Apakah Anda yakin ingin membatalkan pesanan ini?')) {
+      fetch('/checkout/cancel', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderCode, invoiceCode })
+      }).then(() => {
+        window.location.href = '/track?orderCode=' + orderCode;
+      }).catch(() => {
+        window.location.href = '/track?orderCode=' + orderCode;
+      });
+    }
+  }
+</script>

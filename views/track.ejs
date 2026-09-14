@@ -1,0 +1,229 @@
+<div class="container" style="padding-top: 2.5rem; padding-bottom: 5rem;">
+  <div class="page-card">
+
+    <!-- Header -->
+    <div style="text-align: center; margin-bottom: 2rem;">
+      <div style="display: inline-flex; align-items: center; justify-content: center; width: 56px; height: 56px; background: var(--primary-light); border-radius: 16px; margin-bottom: 1rem; border: 1px solid var(--border); color: var(--primary);">
+        <i data-lucide="search" style="width:26px;height:26px;"></i>
+      </div>
+      <h1 style="font-size: 1.5rem; font-weight: 800; color: var(--text-main); margin-bottom: 0.4rem;">Cek Status Pesanan</h1>
+      <p style="color: var(--text-muted); font-size: 0.88rem;">
+        Masukkan kode order untuk melihat status pembayaran &amp; stok produk.
+      </p>
+    </div>
+
+    <!-- Search Form -->
+    <form action="/track" method="GET" style="display: flex; flex-direction: column; gap: 1rem; margin-bottom: 1.75rem;">
+      <div class="form-group" style="margin-bottom: 0;">
+        <label class="form-label" for="trackOrderCode">Kode Order</label>
+        <input type="text" name="orderCode" id="trackOrderCode"
+               placeholder="Contoh: MSQ-9A8F7B2C"
+               value="<%= typeof queryOrderCode !== 'undefined' ? queryOrderCode : '' %>"
+               class="form-control"
+               style="font-family: monospace; font-weight: 700; font-size: 1rem; letter-spacing: 1px;"
+               required>
+      </div>
+
+      <div class="form-group" style="margin-bottom: 0;">
+        <label class="form-label" for="trackContact">Email / No HP (Opsional)</label>
+        <input type="text" name="contactInfo" id="trackContact"
+               placeholder="Verifikasi kepemilikan order"
+               value="<%= typeof queryContactInfo !== 'undefined' ? queryContactInfo : '' %>"
+               class="form-control">
+      </div>
+
+      <button type="submit" class="btn-pill btn-primary" style="padding: 0.9rem; margin-top: 0.35rem; font-size: 0.92rem; gap: 0.45rem;">
+        <i data-lucide="search" style="width:16px;height:16px;"></i>
+        Lacak Pesanan
+      </button>
+    </form>
+
+    <!-- Error -->
+    <% if (typeof error !== 'undefined' && error) { %>
+      <div style="background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.25); color: #f87171; padding: 0.9rem 1.1rem; border-radius: var(--radius-sm); font-weight: 600; font-size: 0.87rem; margin-bottom: 1rem; display:flex; align-items:center; gap:0.5rem;">
+        <i data-lucide="alert-circle" style="width:16px;height:16px; flex-shrink:0;"></i>
+        <%= error %>
+      </div>
+    <% } %>
+
+    <!-- Order Result -->
+    <% if (typeof order !== 'undefined' && order) { %>
+      <div class="glow-line"></div>
+
+      <!-- Order Header -->
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.75rem;">
+        <span style="font-weight: 800; font-size: 1.05rem; color: var(--primary); font-family: monospace; background: var(--primary-light); padding: 0.35rem 0.9rem; border-radius: var(--radius-pill); border: 1px solid var(--border);">
+          <%= order.orderCode %>
+        </span>
+
+        <%
+          let statusClass = 'status-pending';
+          let statusIcon = 'clock';
+          if (order.status === 'COMPLETED') { statusClass = 'status-done'; statusIcon = 'check-circle'; }
+          else if (order.status === 'PAID' || order.status === 'PAYMENT_RECEIVED') { statusClass = 'status-paid'; statusIcon = 'credit-card'; }
+          else if (order.status === 'FAILED' || order.status === 'FAILED_STOCK') { statusClass = 'status-failed'; statusIcon = 'alert-triangle'; }
+          else if (order.status === 'EXPIRED' || order.status === 'CANCELLED') { statusClass = 'status-expired'; statusIcon = 'ban'; }
+        %>
+        <span class="status-badge <%= statusClass %>">
+          <i data-lucide="<%= statusIcon %>" style="width:11px;height:11px;"></i>
+          <%= order.status %>
+        </span>
+      </div>
+
+      <!-- Order Detail -->
+      <div class="order-summary" style="margin-bottom: 1.5rem;">
+        <div class="order-row" style="border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; margin-bottom: 0.5rem;">
+          <span class="order-key">Produk</span>
+          <span class="order-val" style="font-size: 0.85rem; max-width: 60%; text-align: right;"><%= order.product.name %> (x<%= order.qty %>)</span>
+        </div>
+        <div class="order-row" style="border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; margin-bottom: 0.5rem;">
+          <span class="order-key">Total Tagihan</span>
+          <span class="order-val" style="color: var(--primary);">Rp <%= order.totalAmount.toLocaleString('id-ID') %></span>
+        </div>
+        <% if (order.paymentRef) { %>
+        <div class="order-row" style="border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; margin-bottom: 0.5rem;">
+          <span class="order-key">Invoice Pembayaran</span>
+          <span class="order-val" style="font-size: 0.85rem; font-family: monospace; background: var(--bg-input); padding: 0.25rem 0.6rem; border-radius: 4px;"><%= order.paymentRef %></span>
+        </div>
+        <% } %>
+        <div class="order-row">
+          <span class="order-key">Tanggal Order</span>
+          <span class="order-val" style="font-size: 0.82rem;"><%= new Date(order.createdAt).toLocaleString('id-ID') %></span>
+        </div>
+      </div>
+
+      <!-- Status-specific content -->
+      <% if (order.status === 'COMPLETED' && order.parsedTakenStocks) { %>
+        <div style="background: rgba(16,185,129,0.07); border: 1px solid rgba(16,185,129,0.22); padding: 1.25rem; border-radius: var(--radius-sm);">
+          <h4 style="color: #34d399; margin-bottom: 1rem; font-weight: 700; font-size: 1rem; display:flex; align-items:center; gap:0.4rem;">
+            <i data-lucide="gift" style="width:18px;height:18px;"></i>
+            Stok Produk Anda (Item)
+          </h4>
+          <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+            <% 
+              let stocksArray = [];
+              if (Array.isArray(order.parsedTakenStocks)) {
+                stocksArray = order.parsedTakenStocks;
+              } else if (order.parsedTakenStocks && Array.isArray(order.parsedTakenStocks.takenStocks)) {
+                stocksArray = order.parsedTakenStocks.takenStocks;
+              }
+            %>
+            <% if (stocksArray.length > 0) { %>
+              <% stocksArray.forEach((stock, idx) => { %>
+                <div style="background: var(--bg-body); border: 1px solid rgba(16,185,129,0.3); padding: 1rem 1.25rem; border-radius: var(--radius-md); display: flex; justify-content: space-between; align-items: center; gap: 1rem; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                  <code style="color: var(--text-main); font-size: 1rem; flex-grow: 1; word-break: break-all; user-select: all; background: transparent; padding: 0;"><%= typeof stock === 'object' ? JSON.stringify(stock) : stock %></code>
+                  <button type="button" class="btn-primary" style="padding: 0.4rem 0.8rem; font-size: 0.8rem; display:flex; align-items:center; gap: 0.3rem;" onclick="navigator.clipboard.writeText(this.previousElementSibling.innerText).then(() => { const old = this.innerHTML; this.innerHTML = '<i data-lucide=\'check\'></i> Disalin'; lucide.createIcons(); setTimeout(() => { this.innerHTML = old; lucide.createIcons(); }, 2000); })">
+                    <i data-lucide="copy" style="width:14px;height:14px;"></i> Salin
+                  </button>
+                </div>
+              <% }) %>
+            <% } else { %>
+              <div class="stock-item-box" style="white-space: pre-wrap; font-family: monospace; font-size: 0.95rem; background: var(--bg-body); padding: 1rem; border-radius: var(--radius-md); border: 1px solid var(--border);"><%= typeof order.parsedTakenStocks === 'string' ? order.parsedTakenStocks : JSON.stringify(order.parsedTakenStocks, null, 2) %></div>
+            <% } %>
+          </div>
+        </div>
+
+      <% } else if (order.status === 'PENDING_PAYMENT') { %>
+        <div style="background: rgba(245,158,11,0.07); border: 1px solid rgba(245,158,11,0.22); padding: 1.25rem; border-radius: var(--radius-sm); text-align: center;">
+          <p style="color: #fbbf24; font-weight: 700; margin-bottom: 0.5rem; display:flex; align-items:center; justify-content:center; gap:0.4rem;">
+            <i data-lucide="clock" style="width:15px;height:15px;"></i>
+            Menunggu Pembayaran...
+          </p>
+          <p style="font-size: 0.83rem; color: var(--text-muted);">Selesaikan pembayaran untuk menerima stok otomatis.</p>
+          
+          <% if (order.qrString || order.paymentUrl) { %>
+            <div style="margin-top: 1.5rem; margin-bottom: 0.5rem; background: white; padding: 1rem; border-radius: var(--radius-md); display: inline-block; border: 1px solid var(--border); box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+              <img src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=<%= encodeURIComponent(order.qrString || order.paymentUrl) %>" alt="QRIS Code" style="width: 220px; height: 220px; border-radius: 8px;">
+              <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 0.75rem; font-weight: 700; letter-spacing: 0.5px;">SCAN UNTUK MEMBAYAR</div>
+            </div>
+          <% } %>
+
+          <div style="margin-top: 1.25rem; display: flex; justify-content: center;">
+            <button onclick="cancelOrderTrack('<%= order.orderCode %>', '<%= order.paymentRef %>')" class="btn-pill btn-ghost" style="font-size: 0.85rem; padding: 0.5rem 1rem; color: #ef4444; border: 1px solid rgba(239,68,68,0.3); background: rgba(239,68,68,0.05); display: flex; align-items: center; gap: 0.3rem;">
+              <i data-lucide="x-circle" style="width:14px;height:14px;"></i> Batalkan Pesanan
+            </button>
+          </div>
+        </div>
+
+      <% } else if (order.status === 'FAILED_STOCK') { %>
+        <div style="background: rgba(239,68,68,0.07); border: 1px solid rgba(239,68,68,0.22); padding: 1.25rem; border-radius: var(--radius-sm);">
+          <p style="color: #f87171; font-weight: 700; display:flex; align-items:center; gap:0.4rem;">
+            <i data-lucide="alert-triangle" style="width:15px;height:15px;"></i>
+            Pembayaran Diterima — Stok Tertunda
+          </p>
+          <p style="font-size: 0.83rem; color: var(--text-muted); margin-top: 0.4rem;">Stok sedang diproses oleh panel. Kode transaksi Anda aman, hubungi admin jika perlu.</p>
+        </div>
+
+      <% } else if (order.status === 'EXPIRED' || order.status === 'CANCELLED') { %>
+        <div style="background: rgba(100,116,139,0.07); border: 1px solid rgba(100,116,139,0.22); padding: 1.25rem; border-radius: var(--radius-sm); text-align: center;">
+          <p style="color: #94a3b8; font-weight: 700; display:flex; align-items:center; justify-content:center; gap:0.4rem;">
+            <i data-lucide="ban" style="width:15px;height:15px;"></i>
+            Order Dibatalkan / Expired
+          </p>
+          <p style="font-size: 0.83rem; color: var(--text-muted); margin-top: 0.4rem;">Silakan buat order baru.</p>
+          <a href="/" class="btn-pill btn-primary" style="margin-top: 1.1rem; padding: 0.65rem 1.5rem; font-size: 0.85rem; gap:0.4rem;">
+            <i data-lucide="arrow-left" style="width:14px;height:14px;"></i>
+            Belanja Lagi
+          </a>
+        </div>
+      <% } %>
+    <% } %>
+
+    <!-- Order History (Client Side) -->
+    <% if (typeof order === 'undefined' || !order) { %>
+      <div id="orderHistoryContainer" style="display: none; margin-top: 2.5rem;">
+         <h4 style="font-size: 1.05rem; margin-bottom: 1rem; color: var(--text-main); font-weight: 700; display:flex; align-items:center; gap:0.4rem;">
+           <i data-lucide="history" style="width:18px;height:18px; color:var(--text-faint);"></i> Riwayat Pesanan Terakhir Anda
+         </h4>
+         <div id="orderHistoryList" style="display: flex; flex-direction: column; gap: 0.75rem;"></div>
+      </div>
+      <script>
+        document.addEventListener('DOMContentLoaded', () => {
+          try {
+            const history = JSON.parse(localStorage.getItem('masuqik_orders') || '[]');
+            const hasQuery = new URLSearchParams(window.location.search).has('orderCode');
+            
+            // Only show history if we are not currently searching
+            if (history.length > 0 && !hasQuery && !'<%= typeof error !== "undefined" ? error : "" %>') {
+              const container = document.getElementById('orderHistoryContainer');
+              const list = document.getElementById('orderHistoryList');
+              container.style.display = 'block';
+              
+              history.forEach(item => {
+                const date = new Date(item.date).toLocaleDateString('id-ID', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+                const html = `
+                  <a href="/track?orderCode=${item.code}" style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.25rem; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md); text-decoration: none; transition: border-color 0.2s;">
+                    <div>
+                      <div style="font-weight: 800; color: var(--primary); font-family: monospace; font-size: 1.05rem;">${item.code}</div>
+                      <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.3rem;"><i data-lucide="calendar" style="width:12px;height:12px; display:inline-block; vertical-align:middle; margin-right:0.2rem;"></i> ${date}</div>
+                    </div>
+                    <div style="background: var(--bg-input); padding: 0.4rem; border-radius: 50%; color: var(--text-faint);">
+                      <i data-lucide="chevron-right" style="width: 18px; height: 18px;"></i>
+                    </div>
+                  </a>
+                `;
+                list.insertAdjacentHTML('beforeend', html);
+              });
+              if(window.lucide) window.lucide.createIcons();
+            }
+          } catch(e) { console.error('Failed loading order history', e); }
+        });
+      </script>
+    <% } %>
+
+  </div>
+</div>
+
+<script>
+  function cancelOrderTrack(orderCode, invoiceCode) {
+    if (confirm('Yakin ingin membatalkan pesanan ini?')) {
+      fetch('/checkout/cancel', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderCode, invoiceCode })
+      }).then(() => {
+        window.location.reload();
+      });
+    }
+  }
+</script>

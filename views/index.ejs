@@ -1,0 +1,220 @@
+<!-- Hero Section with Wide Banner Slider -->
+<section class="hero-section" style="padding: 2rem 0 3rem 0;">
+  <div class="container hero-content" style="max-width: 1000px;">
+
+    <!-- Banner Carousel Slider -->
+    <% if (typeof banners !== 'undefined' && banners.length > 0) { %>
+      <div class="banner-carousel-wrap">
+        <div id="bannerCarousel" class="banner-carousel">
+          <% banners.forEach((banner, index) => { %>
+            <a href="<%= banner.targetUrl || '/#katalog' %>"
+               class="carousel-slide <%= index === 0 ? 'active' : '' %>"
+               data-index="<%= index %>">
+              <img src="<%= banner.imageUrl %>" alt="<%= banner.title %>" loading="<%= index === 0 ? 'eager' : 'lazy' %>">
+              <div class="carousel-slide-overlay">
+                <h3><%= banner.title %></h3>
+              </div>
+            </a>
+          <% }) %>
+
+          <!-- Navigation Arrows -->
+          <% if (banners.length > 1) { %>
+            <button class="carousel-btn prev" onclick="moveSlide(-1)" aria-label="Sebelumnya">
+              <i data-lucide="chevron-left" style="width:20px;height:20px;"></i>
+            </button>
+            <button class="carousel-btn next" onclick="moveSlide(1)" aria-label="Berikutnya">
+              <i data-lucide="chevron-right" style="width:20px;height:20px;"></i>
+            </button>
+
+            <!-- Dots -->
+            <div class="carousel-dots">
+              <% banners.forEach((_, i) => { %>
+                <button class="carousel-dot <%= i === 0 ? 'active' : '' %>" onclick="goToSlide(<%= i %>)" aria-label="Slide <%= i+1 %>"></button>
+              <% }) %>
+            </div>
+          <% } %>
+        </div>
+      </div>
+    <% } %>
+
+    <!-- Search Bar -->
+    <div class="search-wrapper" style="max-width: 640px;">
+      <form action="/" method="GET">
+        <input type="text" name="search" class="search-input"
+               id="heroSearch"
+               placeholder="Cari proxy, voucher, top-up..."
+               value="<%= typeof searchQuery !== 'undefined' ? searchQuery : '' %>">
+        <button type="submit" class="search-btn" aria-label="Cari">
+          <i data-lucide="search" style="width:18px;height:18px;"></i>
+        </button>
+      </form>
+    </div>
+
+  </div>
+
+  <div class="hero-wave">
+    <svg viewBox="0 0 1200 60" preserveAspectRatio="none">
+      <path d="M0,30 C300,70 900,-10 1200,30 L1200,60 L0,60 Z" fill="var(--bg-main)" opacity="0.9"></path>
+    </svg>
+  </div>
+</section>
+
+<!-- Popular Products Section -->
+<% if (typeof popularProducts !== 'undefined' && popularProducts.length > 0) { %>
+  <section class="container" style="padding-top: 2.5rem; padding-bottom: 0.5rem;">
+    <div class="section-header">
+      <h2 class="section-title">
+        <span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;background:rgba(255,107,53,0.15);border-radius:8px;color:var(--accent);">
+          <i data-lucide="trending-up" style="width:15px;height:15px;"></i>
+        </span>
+        Produk Populer
+      </h2>
+      <span class="section-badge">Terlaris</span>
+    </div>
+
+    <div class="catalog-grid" style="padding-bottom: 1rem;">
+      <% popularProducts.forEach(prod => { %>
+        <a href="/product/<%= prod.id %>" style="text-decoration:none; color:inherit; display:block;">
+        <div class="product-card" style="border-color: rgba(255,107,53,0.2);">
+          <div class="card-image-wrap">
+            <% if (prod.thumbnail) { %>
+              <img src="<%= prod.thumbnail %>" alt="<%= prod.name %>">
+            <% } else { %>
+              <div style="color:var(--text-faint);">
+                <i data-lucide="package" style="width:40px;height:40px;opacity:0.3;"></i>
+              </div>
+            <% } %>
+            <span class="card-badge badge-popular">
+              <i data-lucide="trending-up" style="width:9px;height:9px;"></i> POPULER
+            </span>
+            <span class="card-badge <%= prod.stockCount > 0 ? 'badge-stock' : 'badge-empty' %>" style="top: 38px;">
+              <% if (prod.stockCount > 0) { %>
+                <i data-lucide="check-circle" style="width:9px;height:9px;"></i> <%= prod.stockCount %>
+              <% } else { %>
+                <i data-lucide="x-circle" style="width:9px;height:9px;"></i> Habis
+              <% } %>
+            </span>
+          </div>
+          <div class="card-body">
+            <span class="card-category" style="color: var(--accent);"><%= prod.category %></span>
+            <h3 class="card-title"><%= prod.name %></h3>
+            <div class="card-footer">
+              <div class="price-tag" style="background: linear-gradient(135deg, var(--accent), #ff9a5c); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+                Rp <%= prod.finalPriceRupiah.toLocaleString('id-ID') %>
+              </div>
+              <span class="btn-pill btn-accent"
+                      style="padding: 0.42rem 0.9rem; font-size: 0.78rem; gap: 0.3rem; <%= prod.stockCount <= 0 ? 'opacity:0.45;cursor:not-allowed;' : '' %>">
+                <i data-lucide="shopping-cart" style="width:13px;height:13px;"></i> Beli
+              </span>
+            </div>
+          </div>
+        </div>
+        </a>
+      <% }) %>
+    </div>
+  </section>
+<% } %>
+
+<div class="container"><div class="divider"></div></div>
+
+<!-- Catalog Section -->
+<section class="container" id="katalog" style="padding-top: 1rem;">
+  <div class="section-header">
+    <h2 class="section-title">
+      <span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;background:var(--primary-light);border-radius:8px;color:var(--primary);">
+        <i data-lucide="grid" style="width:15px;height:15px;"></i>
+      </span>
+      Semua Produk
+    </h2>
+    <span class="section-badge"><%= products.length %> Produk</span>
+  </div>
+
+  <div class="category-tabs">
+    <% categories.forEach(cat => { %>
+      <a href="/?category=<%= cat %><%= typeof searchQuery !== 'undefined' && searchQuery ? '&search=' + searchQuery : '' %>"
+         class="tab-item <%= activeCategory === cat ? 'active' : '' %>">
+        <%= cat === 'ALL' ? 'Semua Produk' : cat %>
+      </a>
+    <% }) %>
+  </div>
+
+  <% if (products.length === 0) { %>
+    <div class="empty-state">
+      <div class="empty-icon">
+        <i data-lucide="inbox" style="width:36px;height:36px;"></i>
+      </div>
+      <h3>Produk tidak ditemukan</h3>
+      <p style="margin-top:0.4rem;">Coba kata kunci lain atau pilih kategori yang berbeda.</p>
+      <a href="/" class="btn-pill btn-ghost" style="margin-top: 1.5rem;">
+        <i data-lucide="arrow-left" style="width:14px;height:14px;"></i> Lihat Semua
+      </a>
+    </div>
+  <% } else { %>
+    <div class="catalog-grid">
+      <% products.forEach(prod => { %>
+        <a href="/product/<%= prod.id %>" style="text-decoration:none; color:inherit; display:block;">
+        <div class="product-card">
+          <div class="card-image-wrap">
+            <% if (prod.thumbnail) { %>
+              <img src="<%= prod.thumbnail %>" alt="<%= prod.name %>">
+            <% } else { %>
+              <div style="color:var(--text-faint);">
+                <i data-lucide="package" style="width:40px;height:40px;opacity:0.25;"></i>
+              </div>
+            <% } %>
+            <span class="card-badge <%= prod.stockCount > 0 ? 'badge-stock' : 'badge-empty' %>">
+              <% if (prod.stockCount > 0) { %>
+                <i data-lucide="check-circle" style="width:9px;height:9px;"></i> <%= prod.stockCount %>
+              <% } else { %>
+                <i data-lucide="x-circle" style="width:9px;height:9px;"></i> Habis
+              <% } %>
+            </span>
+          </div>
+          <div class="card-body">
+            <span class="card-category"><%= prod.category %></span>
+            <h3 class="card-title"><%= prod.name %></h3>
+            <div class="card-footer">
+              <div class="price-tag">
+                Rp <%= prod.finalPriceRupiah.toLocaleString('id-ID') %>
+              </div>
+              <span class="btn-pill btn-primary"
+                      style="padding: 0.42rem 0.9rem; font-size: 0.78rem; gap: 0.3rem; <%= prod.stockCount <= 0 ? 'opacity:0.45;cursor:not-allowed;' : '' %>">
+                <i data-lucide="shopping-cart" style="width:13px;height:13px;"></i> Beli
+              </span>
+            </div>
+          </div>
+        </div>
+        </a>
+      <% }) %>
+    </div>
+  <% } %>
+</section>
+
+
+
+<script>
+  // ===== BANNER CAROUSEL =====
+  let currentSlide = 0;
+  const slides = document.querySelectorAll('.carousel-slide');
+  const dots = document.querySelectorAll('.carousel-dot');
+
+  function showSlide(index) {
+    if (!slides || slides.length === 0) return;
+    slides.forEach((s, i) => s.classList.toggle('active', i === index));
+    dots.forEach((d, i) => d.classList.toggle('active', i === index));
+    currentSlide = index;
+  }
+
+  function moveSlide(direction) {
+    if (!slides || slides.length === 0) return;
+    showSlide((currentSlide + direction + slides.length) % slides.length);
+  }
+
+  function goToSlide(index) { showSlide(index); }
+
+  if (slides && slides.length > 1) {
+    setInterval(() => moveSlide(1), 4500);
+  }
+
+
+</script>

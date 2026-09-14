@@ -1,0 +1,63 @@
+<div style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem;">
+  <a href="/admin/orders?status=ALL" class="tab-item <%= activeStatus === 'ALL' ? 'active' : '' %>">Semua Order</a>
+  <a href="/admin/orders?status=COMPLETED" class="tab-item <%= activeStatus === 'COMPLETED' ? 'active' : '' %>">COMPLETED</a>
+  <a href="/admin/orders?status=PENDING_PAYMENT" class="tab-item <%= activeStatus === 'PENDING_PAYMENT' ? 'active' : '' %>">PENDING_PAYMENT</a>
+  <a href="/admin/orders?status=FAILED_STOCK" class="tab-item <%= activeStatus === 'FAILED_STOCK' ? 'active' : '' %>">FAILED_STOCK</a>
+</div>
+
+<table class="data-table">
+  <thead>
+    <tr>
+      <th>Kode Order</th>
+      <th>Kontak Customer</th>
+      <th>Produk & Qty</th>
+      <th>Total Tagihan</th>
+      <th>Status</th>
+      <th>Taken Stocks / Result</th>
+      <th>Aksi</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% if (orders.length === 0) { %>
+      <tr><td colspan="7" style="text-align: center; color: var(--text-muted);">Tidak ada pesanan dengan status ini</td></tr>
+    <% } else { %>
+      <% orders.forEach(o => { %>
+        <tr>
+          <td style="font-weight: 700; font-family: monospace; color: var(--primary);"><%= o.orderCode %></td>
+          <td><%= o.guestContact || o.guestEmail || 'Member User' %></td>
+          <td><%= o.product.name %> (x<%= o.qty %>)</td>
+          <td style="font-weight: 700;">Rp <%= o.totalAmount.toLocaleString('id-ID') %></td>
+          <td>
+            <% 
+              let bg = '#f1f5f9; color:#475569;';
+              if (o.status === 'COMPLETED') bg = '#dcfce7; color:#166534;';
+              else if (o.status === 'FAILED_STOCK') bg = '#fee2e2; color:#991b1b;';
+              else if (o.status === 'PENDING_PAYMENT') bg = '#fef3c7; color:#92400e;';
+            %>
+            <span style="padding: 0.25rem 0.6rem; border-radius: var(--radius-pill); font-size: 0.75rem; font-weight: 700; background: <%= bg %>">
+              <%= o.status %>
+            </span>
+          </td>
+          <td>
+            <% if (o.takenStocks) { %>
+              <div style="font-family: monospace; font-size: 0.75rem; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; background: #0f172a; color: #38bdf8; padding: 0.25rem 0.5rem; border-radius: 4px;">
+                <%= o.takenStocks %>
+              </div>
+            <% } else { %>
+              <span style="color: var(--text-muted); font-size: 0.8rem;">-</span>
+            <% } %>
+          </td>
+          <td>
+            <% if (o.status === 'FAILED_STOCK' || o.status === 'PAID') { %>
+              <form action="/admin/orders/<%= o.orderCode %>/retry" method="POST">
+                <button type="submit" class="btn-pill btn-accent" style="padding: 0.35rem 0.7rem; font-size: 0.75rem;">🔄 Retry Take Stock</button>
+              </form>
+            <% } else { %>
+              <span style="font-size: 0.8rem; color: var(--text-muted);">-</span>
+            <% } %>
+          </td>
+        </tr>
+      <% }) %>
+    <% } %>
+  </tbody>
+</table>

@@ -1,0 +1,410 @@
+<%
+  const panelProducts = products.filter(p => p.source !== 'MANUAL');
+  const manualProducts = products.filter(p => p.source === 'MANUAL');
+  const activeTab = typeof tab !== 'undefined' ? tab : 'panel';
+%>
+
+<!-- Flash Messages -->
+<% if (typeof success !== 'undefined' && success) { %>
+  <div class="admin-alert admin-alert-success" style="display:flex;align-items:center;gap:0.5rem;">
+    <i data-lucide="check-circle" style="width:16px;height:16px;flex-shrink:0;"></i>
+    <%= success %>
+  </div>
+<% } %>
+<% if (typeof error !== 'undefined' && error) { %>
+  <div class="admin-alert admin-alert-error" style="display:flex;align-items:center;gap:0.5rem;">
+    <i data-lucide="alert-circle" style="width:16px;height:16px;flex-shrink:0;"></i>
+    <%= error %>
+  </div>
+<% } %>
+
+<!-- Tab Navigation + Header Actions -->
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; flex-wrap:wrap; gap:1rem;">
+  <!-- Tabs -->
+  <div style="display:flex; gap:0.35rem; background:var(--bg-input); padding:0.3rem; border-radius:var(--radius-sm); border:1px solid var(--border);">
+    <a href="/admin/products?tab=panel"
+       style="padding:0.45rem 1.1rem; border-radius:6px; font-size:0.82rem; font-weight:700; text-decoration:none; display:flex; align-items:center; gap:0.4rem; transition:all 0.2s;
+              <%= activeTab === 'panel' ? 'background:var(--primary);color:#fff;box-shadow:0 2px 8px var(--primary-glow);' : 'color:var(--text-muted);' %>">
+      <i data-lucide="wifi" style="width:13px;height:13px;"></i>
+      Dari Panel (<%= panelProducts.length %>)
+    </a>
+    <a href="/admin/products?tab=manual"
+       style="padding:0.45rem 1.1rem; border-radius:6px; font-size:0.82rem; font-weight:700; text-decoration:none; display:flex; align-items:center; gap:0.4rem; transition:all 0.2s;
+              <%= activeTab === 'manual' ? 'background:var(--accent);color:#fff;box-shadow:0 2px 8px var(--accent-glow);' : 'color:var(--text-muted);' %>">
+      <i data-lucide="pencil" style="width:13px;height:13px;"></i>
+      Manual (<%= manualProducts.length %>)
+    </a>
+  </div>
+
+  <!-- Action Buttons -->
+  <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+    <% if (activeTab === 'manual') { %>
+      <button onclick="openCreateModal()" class="btn-pill btn-accent" style="padding:0.5rem 1.1rem; font-size:0.82rem; gap:0.4rem;">
+        <i data-lucide="plus" style="width:14px;height:14px;"></i>
+        Tambah Produk Manual
+      </button>
+    <% } %>
+    <form action="/admin/products/sync" method="POST" style="margin:0;">
+      <button type="submit" class="btn-pill btn-primary" style="padding:0.5rem 1.1rem; font-size:0.82rem; gap:0.4rem;">
+        <i data-lucide="refresh-cw" style="width:14px;height:14px;"></i>
+        Sync Panel
+      </button>
+    </form>
+  </div>
+</div>
+
+<!-- ===== TAB: PANEL PRODUCTS ===== -->
+<% if (activeTab === 'panel') { %>
+  <% if (panelProducts.length === 0) { %>
+    <div style="text-align:center; padding:3rem; color:var(--text-muted);">
+      <i data-lucide="inbox" style="width:48px;height:48px; opacity:0.3; margin-bottom:1rem;"></i>
+      <p>Belum ada produk dari panel. Klik <strong>Sync Panel</strong> untuk menyinkronkan.</p>
+    </div>
+  <% } else { %>
+    <div class="admin-card" style="padding:0; overflow:hidden;">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Produk</th>
+            <th>Kategori</th>
+            <th>Harga Panel</th>
+            <th>Markup Jual</th>
+            <th>Harga Final</th>
+            <th>Stok</th>
+            <th>Status</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% panelProducts.forEach(p => { %>
+            <tr>
+              <td>
+                <div style="font-weight:700; color:var(--text-main); margin-bottom:0.2rem;"><%= p.name %></div>
+                <div style="font-size:0.72rem; color:var(--text-faint); font-family:monospace;">ID: <%= p.panelProductId %></div>
+              </td>
+              <td>
+                <span style="background:var(--primary-light); color:var(--primary); padding:0.18rem 0.6rem; border-radius:var(--radius-pill); font-size:0.72rem; font-weight:700; border:1px solid var(--border);">
+                  <%= p.category %>
+                </span>
+              </td>
+              <td style="font-weight:600;">Rp <%= p.priceRupiah.toLocaleString('id-ID') %></td>
+              <td>
+                <form action="/admin/products/<%= p.id %>/update" method="POST" style="display:flex; gap:0.4rem; align-items:center;">
+                  <input type="number" name="markupPrice" value="<%= p.markupPrice %>"
+                         style="width:90px; padding:0.38rem 0.6rem; border:1.5px solid var(--border); border-radius:var(--radius-sm); font-size:0.82rem; font-family:Poppins,sans-serif; background:var(--bg-input); color:var(--text-main); outline:none;"
+                         onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border)'"
+                         required>
+                  <button type="submit" class="btn-pill btn-accent" style="padding:0.35rem 0.7rem; font-size:0.75rem;">Simpan</button>
+                </form>
+              </td>
+              <td style="font-weight:800; color:var(--primary);">Rp <%= (p.priceRupiah + p.markupPrice).toLocaleString('id-ID') %></td>
+              <td>
+                <span style="font-weight:700; font-size:0.95rem; color:<%= p.stockCount > 0 ? '#34d399' : '#f87171' %>;">
+                  <%= p.stockCount %>
+                </span>
+              </td>
+              <td>
+                <div style="display:flex; gap:0.3rem; flex-wrap:wrap;">
+                  <span class="status-badge <%= p.isActive ? 'status-done' : 'status-expired' %>">
+                    <%= p.isActive ? 'Aktif' : 'Nonaktif' %>
+                  </span>
+                  <% if (p.isPopular) { %>
+                    <span class="status-badge" style="background:rgba(255,107,53,0.15);color:var(--accent);border:1px solid rgba(255,107,53,0.25);">
+                      Populer
+                    </span>
+                  <% } %>
+                </div>
+              </td>
+              <td>
+                <div style="display:flex; gap:0.3rem; flex-wrap:wrap;">
+                  <form action="/admin/products/<%= p.id %>/toggle" method="POST">
+                    <button type="submit" class="btn-pill" style="padding:0.32rem 0.65rem; font-size:0.72rem; background:<%= p.isActive ? 'rgba(239,68,68,0.1)' : 'var(--primary-light)' %>; color:<%= p.isActive ? '#f87171' : 'var(--primary)' %>; border:1px solid <%= p.isActive ? 'rgba(239,68,68,0.25)' : 'var(--border)' %>;">
+                      <%= p.isActive ? 'Matikan' : 'Aktifkan' %>
+                    </button>
+                  </form>
+                  <form action="/admin/products/<%= p.id %>/toggle-popular" method="POST">
+                    <button type="submit" class="btn-pill" style="padding:0.32rem 0.65rem; font-size:0.72rem; background:<%= p.isPopular ? 'rgba(255,107,53,0.15)' : 'var(--bg-input)' %>; color:<%= p.isPopular ? 'var(--accent)' : 'var(--text-muted)' %>; border:1px solid var(--border);">
+                      <i data-lucide="<%= p.isPopular ? 'star-off' : 'star' %>" style="width:11px;height:11px;"></i>
+                      <%= p.isPopular ? 'Unset' : 'Populer' %>
+                    </button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  <% } %>
+<% } %>
+
+<!-- ===== TAB: MANUAL PRODUCTS ===== -->
+<% if (activeTab === 'manual') { %>
+  <% if (manualProducts.length === 0) { %>
+    <div style="text-align:center; padding:3rem; color:var(--text-muted);">
+      <div style="display:inline-flex;align-items:center;justify-content:center;width:64px;height:64px;background:var(--bg-card);border-radius:16px;border:1px solid var(--border);margin-bottom:1rem;color:var(--text-faint);">
+        <i data-lucide="package-plus" style="width:30px;height:30px;"></i>
+      </div>
+      <p style="margin-bottom:1rem;">Belum ada produk manual.</p>
+      <button onclick="openCreateModal()" class="btn-pill btn-accent" style="gap:0.4rem;">
+        <i data-lucide="plus" style="width:14px;height:14px;"></i>
+        Tambah Produk Manual
+      </button>
+    </div>
+  <% } else { %>
+    <div class="admin-card" style="padding:0; overflow:hidden;">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Produk</th>
+            <th>Kategori</th>
+            <th>Harga Jual</th>
+            <th>Stok</th>
+            <th>Status</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% manualProducts.forEach(p => { %>
+            <tr>
+              <td>
+                <div style="display:flex;align-items:center;gap:0.6rem;">
+                  <% if (p.thumbnail) { %>
+                    <img src="<%= p.thumbnail %>" style="width:36px;height:36px;border-radius:8px;object-fit:cover;flex-shrink:0;" onerror="this.style.display='none'">
+                  <% } else { %>
+                    <div style="width:36px;height:36px;background:var(--bg-input);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--text-faint);">
+                      <i data-lucide="package" style="width:16px;height:16px;"></i>
+                    </div>
+                  <% } %>
+                  <div>
+                    <div style="font-weight:700; color:var(--text-main);"><%= p.name %></div>
+                    <% if (p.description) { %>
+                      <div style="font-size:0.72rem; color:var(--text-faint); margin-top:0.1rem;"><%= p.description.substring(0, 50) %><%= p.description.length > 50 ? '...' : '' %></div>
+                    <% } %>
+                    <div style="font-size:0.68rem; color:var(--text-faint); font-family:monospace; margin-top:0.1rem;">MANUAL</div>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <span style="background:rgba(255,107,53,0.12); color:var(--accent); padding:0.18rem 0.6rem; border-radius:var(--radius-pill); font-size:0.72rem; font-weight:700; border:1px solid rgba(255,107,53,0.25);">
+                  <%= p.category %>
+                </span>
+              </td>
+              <td style="font-weight:800; color:var(--primary);">Rp <%= (p.priceRupiah + p.markupPrice).toLocaleString('id-ID') %></td>
+              <td>
+                <span style="font-weight:700; font-size:0.95rem; color:<%= p.stockCount > 0 ? '#34d399' : '#f87171' %>;">
+                  <%= p.stockCount %>
+                </span>
+                <div style="font-size:0.68rem; color:var(--text-faint);">item</div>
+              </td>
+              <td>
+                <div style="display:flex; gap:0.3rem; flex-wrap:wrap;">
+                  <span class="status-badge <%= p.isActive ? 'status-done' : 'status-expired' %>">
+                    <%= p.isActive ? 'Aktif' : 'Nonaktif' %>
+                  </span>
+                  <% if (p.isPopular) { %>
+                    <span class="status-badge" style="background:rgba(255,107,53,0.15);color:var(--accent);border:1px solid rgba(255,107,53,0.25);">
+                      Populer
+                    </span>
+                  <% } %>
+                </div>
+              </td>
+              <td>
+                <div style="display:flex; gap:0.3rem; flex-wrap:wrap;">
+                  <!-- Kelola Stok -->
+                  <a href="/admin/products/<%= p.id %>/stock" class="btn-pill" style="padding:0.32rem 0.7rem; font-size:0.72rem; background:var(--primary-light); color:var(--primary); border:1px solid var(--border); gap:0.3rem; text-decoration:none;">
+                    <i data-lucide="layers" style="width:11px;height:11px;"></i>
+                    Stok (<%= p.stockCount %>)
+                  </a>
+                  <!-- Edit -->
+                  <button onclick="openEditModal('<%= p.id %>','<%= encodeURIComponent(p.name) %>','<%= p.category %>','<%= p.priceRupiah %>','<%= p.markupPrice %>','<%= encodeURIComponent(p.thumbnail || '') %>','<%= encodeURIComponent(p.description || '') %>')"
+                          class="btn-pill" style="padding:0.32rem 0.65rem; font-size:0.72rem; background:var(--bg-input); color:var(--text-muted); border:1px solid var(--border); gap:0.3rem;">
+                    <i data-lucide="edit-2" style="width:11px;height:11px;"></i>
+                    Edit
+                  </button>
+                  <!-- Toggle Active -->
+                  <form action="/admin/products/<%= p.id %>/toggle" method="POST">
+                    <button type="submit" class="btn-pill" style="padding:0.32rem 0.65rem; font-size:0.72rem; background:<%= p.isActive ? 'rgba(239,68,68,0.1)' : 'var(--primary-light)' %>; color:<%= p.isActive ? '#f87171' : 'var(--primary)' %>; border:1px solid var(--border);">
+                      <%= p.isActive ? 'Nonaktif' : 'Aktif' %>
+                    </button>
+                  </form>
+                  <!-- Toggle Popular -->
+                  <form action="/admin/products/<%= p.id %>/toggle-popular" method="POST">
+                    <button type="submit" class="btn-pill" style="padding:0.32rem 0.65rem; font-size:0.72rem; background:<%= p.isPopular ? 'rgba(255,107,53,0.15)' : 'var(--bg-input)' %>; color:<%= p.isPopular ? 'var(--accent)' : 'var(--text-muted)' %>; border:1px solid var(--border);">
+                      <i data-lucide="<%= p.isPopular ? 'star-off' : 'star' %>" style="width:11px;height:11px;"></i>
+                    </button>
+                  </form>
+                  <!-- Delete -->
+                  <form action="/admin/products/<%= p.id %>/delete" method="POST" onsubmit="return confirm('Hapus produk ini? Pastikan tidak ada order terkait.')">
+                    <button type="submit" class="btn-pill" style="padding:0.32rem 0.65rem; font-size:0.72rem; background:rgba(239,68,68,0.1); color:#f87171; border:1px solid rgba(239,68,68,0.25);">
+                      <i data-lucide="trash-2" style="width:11px;height:11px;"></i>
+                    </button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  <% } %>
+<% } %>
+
+<!-- ===== MODAL: CREATE MANUAL PRODUCT ===== -->
+<div id="createModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.65); backdrop-filter:blur(8px); z-index:300; align-items:center; justify-content:center; padding:1rem;">
+  <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius); padding:2rem; width:100%; max-width:500px; box-shadow:var(--shadow-lg), var(--shadow-glow); position:relative; animation:modalIn 0.3s cubic-bezier(0.34,1.56,0.64,1); max-height:90vh; overflow-y:auto;">
+    <button onclick="closeCreateModal()" style="position:absolute;top:1rem;right:1rem;background:var(--bg-input);border:1px solid var(--border);border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text-muted);">
+      <i data-lucide="x" style="width:15px;height:15px;"></i>
+    </button>
+
+    <div style="margin-bottom:1.5rem;">
+      <span style="background:rgba(255,107,53,0.15);color:var(--accent);padding:0.28rem 0.85rem;border-radius:var(--radius-pill);font-size:0.75rem;font-weight:700;border:1px solid rgba(255,107,53,0.25);display:inline-flex;align-items:center;gap:0.35rem;">
+        <i data-lucide="package-plus" style="width:12px;height:12px;"></i>
+        Produk Manual Baru
+      </span>
+    </div>
+
+    <h3 style="font-size:1.2rem;font-weight:800;color:var(--text-main);margin-bottom:1.5rem;">Tambah Produk Manual</h3>
+
+    <form action="/admin/products/create" method="POST">
+      <div class="admin-form-group">
+        <label class="admin-form-label">Nama Produk *</label>
+        <input type="text" name="name" class="admin-form-control" placeholder="cth: Voucher Netflix 1 Bulan" required>
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem;">
+        <div class="admin-form-group">
+          <label class="admin-form-label">Kategori *</label>
+          <input type="text" name="category" class="admin-form-control" placeholder="cth: VOUCHER" required>
+        </div>
+        <div class="admin-form-group">
+          <label class="admin-form-label">Harga Jual (Rp) *</label>
+          <input type="number" name="priceRupiah" class="admin-form-control" placeholder="50000" min="0" required>
+        </div>
+      </div>
+
+      <div class="admin-form-group">
+        <label class="admin-form-label">Markup Tambahan (Rp)</label>
+        <input type="number" name="markupPrice" class="admin-form-control" placeholder="0" value="0" min="0">
+        <div style="font-size:0.72rem;color:var(--text-faint);margin-top:0.3rem;">Harga final = Harga Jual + Markup</div>
+      </div>
+
+      <div class="admin-form-group">
+        <label class="admin-form-label">URL Thumbnail (opsional)</label>
+        <input type="url" name="thumbnail" class="admin-form-control" placeholder="https://...">
+      </div>
+
+      <div class="admin-form-group" style="margin-bottom:1.75rem;">
+        <label class="admin-form-label">Deskripsi Singkat (opsional)</label>
+        <textarea name="description" class="admin-form-control" rows="2" placeholder="Deskripsi produk..." style="resize:vertical;"></textarea>
+      </div>
+
+      <div style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);border-radius:var(--radius-sm);padding:0.85rem;margin-bottom:1.5rem;font-size:0.8rem;color:#fbbf24;display:flex;gap:0.5rem;">
+        <i data-lucide="info" style="width:14px;height:14px;flex-shrink:0;margin-top:0.1rem;"></i>
+        <span>Setelah produk dibuat, tambahkan stok dari halaman <strong>Kelola Stok</strong>. Setiap baris = 1 item stok yang akan diberikan ke customer saat payment sukses.</span>
+      </div>
+
+      <div style="display:flex;gap:0.75rem;">
+        <button type="button" onclick="closeCreateModal()" class="btn-pill" style="flex:1;background:var(--bg-input);color:var(--text-muted);border:1px solid var(--border);">Batal</button>
+        <button type="submit" class="btn-pill btn-accent" style="flex:2;gap:0.4rem;">
+          <i data-lucide="plus" style="width:14px;height:14px;"></i>
+          Buat Produk
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ===== MODAL: EDIT MANUAL PRODUCT ===== -->
+<div id="editModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.65); backdrop-filter:blur(8px); z-index:300; align-items:center; justify-content:center; padding:1rem;">
+  <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius); padding:2rem; width:100%; max-width:500px; box-shadow:var(--shadow-lg); position:relative; animation:modalIn 0.3s cubic-bezier(0.34,1.56,0.64,1); max-height:90vh; overflow-y:auto;">
+    <button onclick="closeEditModal()" style="position:absolute;top:1rem;right:1rem;background:var(--bg-input);border:1px solid var(--border);border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text-muted);">
+      <i data-lucide="x" style="width:15px;height:15px;"></i>
+    </button>
+
+    <h3 style="font-size:1.2rem;font-weight:800;color:var(--text-main);margin-bottom:1.5rem;">Edit Produk Manual</h3>
+
+    <form id="editForm" action="" method="POST">
+      <div class="admin-form-group">
+        <label class="admin-form-label">Nama Produk *</label>
+        <input type="text" name="name" id="editName" class="admin-form-control" required>
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem;">
+        <div class="admin-form-group">
+          <label class="admin-form-label">Kategori *</label>
+          <input type="text" name="category" id="editCategory" class="admin-form-control" required>
+        </div>
+        <div class="admin-form-group">
+          <label class="admin-form-label">Harga Jual (Rp) *</label>
+          <input type="number" name="priceRupiah" id="editPrice" class="admin-form-control" min="0" required>
+        </div>
+      </div>
+
+      <div class="admin-form-group">
+        <label class="admin-form-label">Markup Tambahan (Rp)</label>
+        <input type="number" name="markupPrice" id="editMarkup" class="admin-form-control" min="0">
+      </div>
+
+      <div class="admin-form-group">
+        <label class="admin-form-label">URL Thumbnail</label>
+        <input type="url" name="thumbnail" id="editThumbnail" class="admin-form-control">
+      </div>
+
+      <div class="admin-form-group" style="margin-bottom:1.75rem;">
+        <label class="admin-form-label">Deskripsi</label>
+        <textarea name="description" id="editDescription" class="admin-form-control" rows="2" style="resize:vertical;"></textarea>
+      </div>
+
+      <div style="display:flex;gap:0.75rem;">
+        <button type="button" onclick="closeEditModal()" class="btn-pill" style="flex:1;background:var(--bg-input);color:var(--text-muted);border:1px solid var(--border);">Batal</button>
+        <button type="submit" class="btn-pill btn-primary" style="flex:2;gap:0.4rem;">
+          <i data-lucide="save" style="width:14px;height:14px;"></i>
+          Simpan Perubahan
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  // Create Modal
+  function openCreateModal() {
+    document.getElementById('createModal').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+    if (window.lucide) lucide.createIcons();
+  }
+  function closeCreateModal() {
+    document.getElementById('createModal').style.display = 'none';
+    document.body.style.overflow = '';
+  }
+  document.getElementById('createModal').addEventListener('click', function(e) {
+    if (e.target === this) closeCreateModal();
+  });
+
+  // Edit Modal
+  function openEditModal(id, name, category, price, markup, thumbnail, description) {
+    document.getElementById('editForm').action = '/admin/products/' + id + '/edit';
+    document.getElementById('editName').value = decodeURIComponent(name);
+    document.getElementById('editCategory').value = category;
+    document.getElementById('editPrice').value = price;
+    document.getElementById('editMarkup').value = markup;
+    document.getElementById('editThumbnail').value = decodeURIComponent(thumbnail);
+    document.getElementById('editDescription').value = decodeURIComponent(description);
+    document.getElementById('editModal').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+    if (window.lucide) lucide.createIcons();
+  }
+  function closeEditModal() {
+    document.getElementById('editModal').style.display = 'none';
+    document.body.style.overflow = '';
+  }
+  document.getElementById('editModal').addEventListener('click', function(e) {
+    if (e.target === this) closeEditModal();
+  });
+
+  // Auto-open create modal if redirected with error
+  <% if (typeof tab !== 'undefined' && tab === 'manual' && typeof error !== 'undefined' && error) { %>
+    openCreateModal();
+  <% } %>
+</script>

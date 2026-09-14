@@ -1,0 +1,141 @@
+<section class="container" style="padding-top: 2rem; padding-bottom: 4rem; max-width: 900px;">
+  <div style="margin-bottom: 1.5rem;">
+    <a href="/" style="display:inline-flex; align-items:center; gap:0.4rem; color:var(--text-faint); text-decoration:none; font-size:0.95rem; font-weight: 500; transition: color 0.2s;">
+      <i data-lucide="arrow-left" style="width:18px;height:18px;"></i> Kembali
+    </a>
+  </div>
+
+  <div class="product-detail-wrapper" style="display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; background: var(--bg-card); padding: 2.5rem; border-radius: var(--radius-xl); border: 1px solid var(--border); box-shadow: var(--shadow-sm);">
+    
+    <!-- Image -->
+    <div class="product-image" style="border-radius: var(--radius-lg); overflow: hidden; background: var(--bg-input); display:flex; align-items:center; justify-content:center; min-height: 350px; border: 1px solid var(--border);">
+      <% if (product.thumbnail) { %>
+        <img src="<%= product.thumbnail %>" alt="<%= product.name %>" style="width:100%; height:100%; max-height: 400px; object-fit: contain; padding: 1rem;">
+      <% } else { %>
+        <i data-lucide="package" style="width:72px;height:72px; opacity:0.3; color:var(--text-faint);"></i>
+      <% } %>
+    </div>
+
+    <!-- Info & Buy Form -->
+    <div class="product-info">
+      <span style="display:inline-block; padding: 0.3rem 0.8rem; background: rgba(255, 107, 53, 0.1); color: var(--accent); font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; border-radius: var(--radius-pill); margin-bottom: 0.8rem;"><%= product.category %></span>
+      <h1 style="font-size: 2rem; margin: 0 0 1rem 0; color: var(--text-main); font-weight: 800; line-height: 1.3;"><%= product.name %></h1>
+      
+      <div style="font-size: 2.2rem; font-weight: 800; color: var(--primary); margin-bottom: 1rem; display:flex; align-items:center; gap:0.75rem;">
+        Rp <%= product.finalPriceRupiah.toLocaleString('id-ID') %>
+      </div>
+
+      <!-- Professional Stock Display -->
+      <div style="margin-bottom: 1.5rem; display: flex; flex-direction: column; gap: 0.5rem;">
+        <% if (product.stockCount > 0) { %>
+          <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.8rem 1.2rem; background: rgba(34,197,94,0.05); border: 1px solid rgba(34,197,94,0.2); border-radius: var(--radius-md);">
+            <div style="display: flex; align-items: center; gap: 0.6rem; color: #22c55e; font-weight: 600; font-size: 0.95rem;">
+              <i data-lucide="check-circle" style="width:18px;height:18px;"></i>
+              <span>Stok Tersedia</span>
+            </div>
+            <span style="background: #22c55e; color: white; padding: 0.25rem 0.75rem; border-radius: var(--radius-pill); font-weight: 700; font-size: 0.85rem; box-shadow: 0 2px 8px rgba(34,197,94,0.25);">
+              <%= product.stockCount %>
+            </span>
+          </div>
+        <% } else { %>
+          <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.8rem 1.2rem; background: rgba(239,68,68,0.05); border: 1px solid rgba(239,68,68,0.2); border-radius: var(--radius-md);">
+            <div style="display: flex; align-items: center; gap: 0.6rem; color: #ef4444; font-weight: 600; font-size: 0.95rem;">
+              <i data-lucide="x-circle" style="width:18px;height:18px;"></i>
+              <span>Stok Habis</span>
+            </div>
+          </div>
+        <% } %>
+      </div>
+
+      <% if (product.description) { %>
+        <div style="color: var(--text-muted); font-size: 1rem; line-height: 1.6; margin-bottom: 2rem; padding: 1rem; background: var(--bg-body); border-radius: var(--radius-md); border: 1px solid var(--border);">
+          <%= product.description %>
+        </div>
+      <% } %>
+
+      <div class="glow-line" style="margin-bottom: 2rem;"></div>
+
+      <form action="/checkout" method="POST" id="checkoutFormDetail">
+        <input type="hidden" name="productId" value="<%= product.id %>">
+        
+        <div class="form-group" style="margin-bottom: 1.25rem;">
+          <label class="form-label" for="qty" style="font-weight: 600;">Jumlah Beli</label>
+          <div style="display:flex; align-items:center; gap:0.75rem;">
+            <input type="number" name="qty" id="qty" min="1" max="<%= product.stockCount %>" value="1" class="form-control" style="max-width: 120px; text-align: center; font-weight: 600; font-size: 1.1rem;" required <%= product.stockCount <= 0 ? 'disabled' : '' %>>
+            <span style="color:var(--text-faint); font-size:0.85rem;">Maksimal: <%= product.stockCount %></span>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 1.25rem;">
+          <label class="form-label" for="guestContact" style="font-weight: 600;">Email / WhatsApp</label>
+          <input type="text" name="guestContact" id="guestContact"
+                 placeholder="email@domain.com atau 0812xxx"
+                 class="form-control" style="padding: 0.8rem 1rem;" required <%= product.stockCount <= 0 ? 'disabled' : '' %>>
+          <div style="font-size: 0.75rem; color: var(--text-faint); margin-top: 0.4rem; display:flex; align-items:center; gap:0.3rem;">
+            <i data-lucide="info" style="width:14px;height:14px;"></i> Diperlukan untuk notifikasi order & akses pesanan
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 2rem;">
+          <label class="form-label" style="font-weight: 600;">Metode Pembayaran</label>
+          <select name="paymentMethod" class="form-control" style="padding: 0.8rem 1rem; appearance: none; background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23cccccc%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E'); background-repeat: no-repeat; background-position: right 1rem top 50%; background-size: 0.65rem auto;" <%= product.stockCount <= 0 ? 'disabled' : '' %>>
+            <option value="QRIS">QRIS (Otomatis)</option>
+          </select>
+        </div>
+
+        <button type="submit" class="btn-primary" style="width: 100%; padding: 1.1rem; border-radius: var(--radius-lg); font-size: 1.1rem; font-weight: 700; display:flex; justify-content:center; align-items:center; gap:0.5rem; transition: all 0.2s; box-shadow: 0 4px 14px rgba(255, 107, 53, 0.3);" <%= product.stockCount <= 0 ? 'disabled' : '' %>>
+          <i data-lucide="shopping-bag" style="width:22px;height:22px;"></i> Beli Sekarang
+        </button>
+      </form>
+
+      <script>
+        const checkoutForm = document.getElementById('checkoutFormDetail');
+        if (checkoutForm) {
+          checkoutForm.addEventListener('submit', function(e) {
+            const history = JSON.parse(localStorage.getItem('masuqik_orders') || '[]');
+            if (history.length > 0) {
+              e.preventDefault();
+              const lastOrder = history[0];
+              const btn = this.querySelector('button[type="submit"]');
+              const originalText = btn.innerHTML;
+              btn.innerHTML = '<span style="display:flex; align-items:center; gap:0.5rem;"><i data-lucide="loader" style="width:22px;height:22px; animation:spin 2s linear infinite;"></i> Memproses...</span>';
+              btn.disabled = true;
+              if (window.lucide) window.lucide.createIcons();
+              
+              fetch('/checkout/status/' + lastOrder.code)
+                .then(res => res.json())
+                .then(data => {
+                  if (data.status === 'PENDING_PAYMENT') {
+                    alert('Sistem mendeteksi Anda masih memiliki pesanan (' + lastOrder.code + ') yang belum dibayar. Mohon selesaikan atau batalkan pesanan tersebut terlebih dahulu.');
+                    window.location.href = '/track?orderCode=' + lastOrder.code;
+                  } else {
+                    this.submit(); // Valid to order again
+                  }
+                })
+                .catch(() => {
+                  this.submit(); // fallback
+                });
+            }
+          });
+        }
+      </script>
+    </div>
+  </div>
+</section>
+<style>
+  @keyframes spin { 100% { transform: rotate(360deg); } }
+</style>
+
+<!-- Add responsiveness -->
+<style>
+  @media (max-width: 768px) {
+    .product-detail-wrapper {
+      grid-template-columns: 1fr !important;
+      gap: 1.5rem !important;
+      padding: 1.5rem !important;
+    }
+    .product-image {
+      min-height: 250px !important;
+    }
+  }
+</style>

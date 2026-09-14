@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Login — Masuqik Store</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body style="background: #0f172a; display: flex; align-items: center; justify-content: center; min-height: 100vh;">
+  <div style="background: #ffffff; width: 100%; max-width: 400px; padding: 2.5rem; border-radius: var(--radius); box-shadow: var(--shadow-lg);">
+    <div style="text-align: center; margin-bottom: 2rem;">
+      <h1 style="font-size: 1.5rem; font-weight: 800;">Masuqik <span style="color: var(--primary);">Admin</span></h1>
+      <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 0.25rem;">Masuk ke dashboard pengelola toko</p>
+    </div>
+
+    <% if (typeof error !== 'undefined' && error) { %>
+      <div style="background: #fef2f2; border: 1px solid #fecaca; color: #dc2626; padding: 0.75rem; border-radius: var(--radius-sm); font-size: 0.85rem; text-align: center; margin-bottom: 1.25rem;">
+        <%= error %>
+      </div>
+    <% } %>
+
+    <form action="/admin/login" method="POST">
+      <div style="margin-bottom: 1.25rem;">
+        <label style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.35rem;">Email Admin:</label>
+        <input type="email" name="email" placeholder="admin@masuqik.store" style="width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: var(--radius-sm);" required>
+      </div>
+
+      <div style="margin-bottom: 1.75rem;">
+        <label style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.35rem;">Password:</label>
+        <input type="password" name="password" placeholder="••••••••" style="width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: var(--radius-sm);" required>
+      </div>
+
+      <button type="submit" class="btn-pill btn-primary" style="width: 100%; padding: 0.85rem; font-size: 0.95rem;">Login ke Dashboard</button>
+    </form>
+  </div>
+</body>
+</html>

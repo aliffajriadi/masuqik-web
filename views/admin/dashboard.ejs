@@ -1,0 +1,59 @@
+<div class="stat-card-grid">
+  <div class="stat-card">
+    <div class="stat-label">Total Omset (COMPLETED)</div>
+    <div class="stat-value" style="color: #059669;">Rp <%= stats.totalRevenue.toLocaleString('id-ID') %></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Total Pesanan</div>
+    <div class="stat-value"><%= stats.totalOrders %></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Pesanan Sukses</div>
+    <div class="stat-value" style="color: var(--primary);"><%= stats.completedOrders %></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Pesanan Pending</div>
+    <div class="stat-value" style="color: #d97706;"><%= stats.pendingOrders %></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Produk Aktif</div>
+    <div class="stat-value"><%= stats.totalProducts %></div>
+  </div>
+</div>
+
+<div style="background: #ffffff; border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; box-shadow: var(--shadow-sm);">
+  <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 1rem;">5 Pesanan Terakhir</h3>
+  
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Kode Order</th>
+        <th>Produk</th>
+        <th>Qty</th>
+        <th>Total Tagihan</th>
+        <th>Status</th>
+        <th>Tanggal</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% if (stats.recentOrders.length === 0) { %>
+        <tr><td colspan="6" style="text-align: center; color: var(--text-muted);">Belum ada pesanan</td></tr>
+      <% } else { %>
+        <% stats.recentOrders.forEach(o => { %>
+          <tr>
+            <td style="font-weight: 700; font-family: monospace;"><%= o.orderCode %></td>
+            <td><%= o.product.name %></td>
+            <td><%= o.qty %></td>
+            <td style="font-weight: 700;">Rp <%= o.totalAmount.toLocaleString('id-ID') %></td>
+            <td>
+              <span style="padding: 0.25rem 0.6rem; border-radius: var(--radius-pill); font-size: 0.75rem; font-weight: 700; background: <%= o.status === 'COMPLETED' ? '#dcfce7; color:#166534;' : '#fef3c7; color:#92400e;' %>">
+                <%= o.status %>
+              </span>
+            </td>
+            <td><%= new Date(o.createdAt).toLocaleString('id-ID') %></td>
+          </tr>
+        <% }) %>
+      <% } %>
+    </tbody>
+  </table>
+</div>

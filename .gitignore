@@ -87,3 +87,6 @@ dev.db
 *.njsproj
 *.sln
 *.sw?
+
+.PRD.md
+.Rules.md

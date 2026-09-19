@@ -66,3 +66,41 @@
     <button type="submit" class="btn-pill btn-primary" style="padding: 0.75rem 1.5rem;">Simpan Pengaturan</button>
   </form>
 </div>
+
+<div style="max-width: 650px; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 2rem; box-shadow: var(--shadow-sm); margin-top: 2rem;">
+  <h3 style="font-size: 1.2rem; font-weight: 800; margin-bottom: 0.5rem;">Ubah Password Admin</h3>
+  <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">
+    Ganti kata sandi akun admin Anda untuk menjaga keamanan akun.
+  </p>
+
+  <% if (typeof pwdSuccess !== 'undefined' && pwdSuccess) { %>
+    <div style="background: #dcfce7; border: 1px solid #bbf7d0; color: #166534; padding: 0.75rem; border-radius: var(--radius-sm); font-size: 0.85rem; margin-bottom: 1.25rem; font-weight: 600;">
+      <%= pwdSuccess %>
+    </div>
+  <% } %>
+  
+  <% if (typeof pwdError !== 'undefined' && pwdError) { %>
+    <div style="background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.25); color: #f87171; padding: 0.75rem; border-radius: var(--radius-sm); font-size: 0.85rem; margin-bottom: 1.25rem; font-weight: 600;">
+      <%= pwdError %>
+    </div>
+  <% } %>
+
+  <form action="/admin/change-password" method="POST">
+    <div style="margin-bottom: 1.25rem;">
+      <label style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.35rem;">Password Lama:</label>
+      <input type="password" name="old_password" required placeholder="Masukkan password lama" class="admin-form-control">
+    </div>
+
+    <div style="margin-bottom: 1.25rem;">
+      <label style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.35rem;">Password Baru:</label>
+      <input type="password" name="new_password" required placeholder="Masukkan password baru" class="admin-form-control">
+    </div>
+
+    <div style="margin-bottom: 1.75rem;">
+      <label style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.35rem;">Konfirmasi Password Baru:</label>
+      <input type="password" name="confirm_password" required placeholder="Ketik ulang password baru" class="admin-form-control">
+    </div>
+
+    <button type="submit" class="btn-pill btn-accent" style="padding: 0.75rem 1.5rem;">Ubah Password</button>
+  </form>
+</div>

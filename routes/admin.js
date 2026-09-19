@@ -358,8 +358,50 @@ router.post('/settings', async (req, res, next) => {
       activeTab: 'settings',
       layout: 'admin/layout',
       settings,
-      successMessage: 'Pengaturan webhook berhasil disimpan!'
+      successMessage: 'Pengaturan berhasil disimpan!'
     });
+  } catch (err) { next(err); }
+});
+
+// POST /admin/change-password
+router.post('/change-password', async (req, res, next) => {
+  try {
+    const { old_password, new_password, confirm_password } = req.body;
+    const settings = await getStoreSettings();
+    const renderSettings = (locals) => {
+      return res.render('admin/settings', {
+        title: 'Pengaturan Webhook',
+        pageTitle: 'Pengaturan Webhook Notifikasi Pembelian',
+        activeTab: 'settings',
+        layout: 'admin/layout',
+        settings,
+        ...locals
+      });
+    };
+
+    if (new_password !== confirm_password) {
+      return renderSettings({ pwdError: 'Password baru dan konfirmasi tidak cocok.' });
+    }
+
+    const userId = req.session.user.id;
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+
+    if (!user) {
+      return renderSettings({ pwdError: 'User tidak ditemukan.' });
+    }
+
+    const isMatch = await bcrypt.compare(old_password, user.password);
+    if (!isMatch) {
+      return renderSettings({ pwdError: 'Password lama salah.' });
+    }
+
+    const hashedPassword = await bcrypt.hash(new_password, 10);
+    await prisma.user.update({
+      where: { id: userId },
+      data: { password: hashedPassword }
+    });
+
+    return renderSettings({ pwdSuccess: 'Password berhasil diubah!' });
   } catch (err) { next(err); }
 });
 

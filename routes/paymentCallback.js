@@ -11,17 +11,8 @@ router.post('/anjay', async (req, res) => {
   const paramSecret = req.query.secret || req.query.token || req.query.key;
   const expectedSecret = config.anjayWebhookSecret;
 
-  // Autentikasi via Query Parameter
-  if (expectedSecret && paramSecret !== expectedSecret) {
-    // Jika dikirimkan param secret tapi tidak cocok, atau param secret wajib
-    const signature = req.headers['x-webhook-signature'] || req.headers['x-signature'];
-    const isValidSignature = await verifyAnjayWebhook(req.body, signature);
-
-    if (!isValidSignature && paramSecret !== expectedSecret) {
-      console.error('[PaymentCallback] Invalid webhook secret param / signature detected');
-      return res.status(401).json({ error: 'Unauthorized secret parameter' });
-    }
-  }
+  // Autentikasi dihilangkan sesuai permintaan
+  // (Validasi signature webhook dinonaktifkan)
 
   const rawBody = req.body;
   const payload = typeof rawBody === 'string' ? JSON.parse(rawBody) : rawBody;

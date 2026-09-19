@@ -88,5 +88,5 @@ dev.db
 *.sln
 *.sw?
 
-.PRD.md
-.Rules.md
+PRD.md
+Rules.md

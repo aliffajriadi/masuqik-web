@@ -1,4 +1,4 @@
-<div style="max-width: 650px; background: #ffffff; border: 1px solid var(--border); border-radius: var(--radius); padding: 2rem; box-shadow: var(--shadow-sm);">
+<div style="max-width: 650px; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 2rem; box-shadow: var(--shadow-sm);">
   <h3 style="font-size: 1.2rem; font-weight: 800; margin-bottom: 0.5rem;">Konfigurasi Webhook Notifikasi Pembelian</h3>
   <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">
     Setiap transaksi berhasil (status COMPLETED), sistem akan otomatis mengirim HTTP POST notifikasi ke URL tujuan dengan signing HMAC-SHA256.
@@ -20,13 +20,47 @@
 
     <div style="margin-bottom: 1.25rem;">
       <label style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.35rem;">URL Tujuan Webhook (POST):</label>
-      <input type="url" name="purchase_webhook_url" value="<%= settings.purchase_webhook_url || '' %>" placeholder="https://api.yourdomain.com/webhooks/purchase" style="width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: var(--radius-sm);">
+      <input type="url" name="purchase_webhook_url" value="<%= settings.purchase_webhook_url || '' %>" placeholder="https://api.yourdomain.com/webhooks/purchase" class="admin-form-control">
     </div>
 
     <div style="margin-bottom: 1.75rem;">
       <label style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.35rem;">Secret Key Signing (HMAC-SHA256):</label>
-      <input type="text" name="purchase_webhook_secret" value="<%= settings.purchase_webhook_secret || '' %>" placeholder="secret_signing_key_123" style="width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: var(--radius-sm); font-family: monospace;">
+      <input type="text" name="purchase_webhook_secret" value="<%= settings.purchase_webhook_secret || '' %>" placeholder="secret_signing_key_123" class="admin-form-control">
       <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">Dikirim via HTTP Header: <code>X-Signature</code></p>
+    </div>
+
+    <hr style="border: 0; height: 1px; background: var(--border); margin: 2rem 0;">
+
+    <h3 style="font-size: 1.2rem; font-weight: 800; margin-bottom: 0.5rem;">Konfigurasi Integrasi Panel (Reseller)</h3>
+    <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">
+      Pengaturan koneksi ke server Panel Store untuk sinkronisasi produk dan pengambilan stok.
+    </p>
+
+    <div style="margin-bottom: 1.25rem;">
+      <label style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.35rem;">Panel Base URL:</label>
+      <input type="url" name="panel_base_url" value="<%= settings.panel_base_url || '' %>" placeholder="https://panel.contoh.com" class="admin-form-control">
+    </div>
+
+    <div style="margin-bottom: 1.75rem;">
+      <label style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.35rem;">Panel API Key:</label>
+      <input type="text" name="panel_api_key" value="<%= settings.panel_api_key || '' %>" placeholder="API Key Panel Anda" class="admin-form-control">
+    </div>
+
+    <hr style="border: 0; height: 1px; background: var(--border); margin: 2rem 0;">
+
+    <h3 style="font-size: 1.2rem; font-weight: 800; margin-bottom: 0.5rem;">Konfigurasi Integrasi Payment Gateway</h3>
+    <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">
+      Pengaturan koneksi ke Payment Gateway (Anjay PG).
+    </p>
+
+    <div style="margin-bottom: 1.25rem;">
+      <label style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.35rem;">API Key:</label>
+      <input type="text" name="anjay_api_key" value="<%= settings.anjay_api_key || '' %>" placeholder="API Key Gateway" class="admin-form-control">
+    </div>
+
+    <div style="margin-bottom: 1.75rem;">
+      <label style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.35rem;">Webhook Secret:</label>
+      <input type="text" name="anjay_webhook_secret" value="<%= settings.anjay_webhook_secret || '' %>" placeholder="Secret Key Webhook dari Gateway" class="admin-form-control">
     </div>
 
     <button type="submit" class="btn-pill btn-primary" style="padding: 0.75rem 1.5rem;">Simpan Pengaturan</button>

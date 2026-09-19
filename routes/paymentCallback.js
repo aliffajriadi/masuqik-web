@@ -15,7 +15,7 @@ router.post('/anjay', async (req, res) => {
   if (expectedSecret && paramSecret !== expectedSecret) {
     // Jika dikirimkan param secret tapi tidak cocok, atau param secret wajib
     const signature = req.headers['x-webhook-signature'] || req.headers['x-signature'];
-    const isValidSignature = verifyAnjayWebhook(req.body, signature);
+    const isValidSignature = await verifyAnjayWebhook(req.body, signature);
 
     if (!isValidSignature && paramSecret !== expectedSecret) {
       console.error('[PaymentCallback] Invalid webhook secret param / signature detected');

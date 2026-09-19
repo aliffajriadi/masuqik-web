@@ -336,11 +336,19 @@ router.get('/settings', async (req, res, next) => {
 // POST /admin/settings - Save Webhook Settings
 router.post('/settings', async (req, res, next) => {
   try {
-    const { purchase_webhook_enabled, purchase_webhook_url, purchase_webhook_secret } = req.body;
+    const { 
+      purchase_webhook_enabled, purchase_webhook_url, purchase_webhook_secret,
+      panel_base_url, panel_api_key, anjay_api_key, anjay_webhook_secret 
+    } = req.body;
+
     await updateStoreSettings({
       purchase_webhook_enabled: purchase_webhook_enabled === 'true' ? 'true' : 'false',
       purchase_webhook_url: purchase_webhook_url || '',
-      purchase_webhook_secret: purchase_webhook_secret || ''
+      purchase_webhook_secret: purchase_webhook_secret || '',
+      panel_base_url: panel_base_url || '',
+      panel_api_key: panel_api_key || '',
+      anjay_api_key: anjay_api_key || '',
+      anjay_webhook_secret: anjay_webhook_secret || ''
     });
 
     const settings = await getStoreSettings();

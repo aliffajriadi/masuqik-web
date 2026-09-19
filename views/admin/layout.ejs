@@ -23,7 +23,9 @@
     .admin-sidebar {
       width: 260px;
       flex-shrink: 0;
-      background: var(--bg-card);
+      background: var(--bg-glass);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
       border-right: 1px solid var(--border);
       padding: 1.5rem 0;
       display: flex;
@@ -93,18 +95,20 @@
       background: var(--primary-light);
       color: var(--primary);
       border-left-color: var(--primary);
+      transform: translateX(4px);
     }
 
     .admin-menu a.active {
-      background: var(--primary-light);
-      color: var(--primary);
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: #fff;
       font-weight: 700;
-      border-left-color: var(--primary);
+      border-left-color: transparent;
+      box-shadow: 0 4px 14px var(--primary-glow);
     }
 
     .admin-content {
       flex: 1;
-      background: var(--bg-main);
+      background: transparent;
       padding: 2rem;
       overflow: auto;
       min-width: 0;

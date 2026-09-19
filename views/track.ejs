@@ -143,6 +143,20 @@
               <i data-lucide="x-circle" style="width:14px;height:14px;"></i> Batalkan Pesanan
             </button>
           </div>
+          
+          <script>
+            // Polling realtime sederhana (3 detik)
+            setInterval(() => {
+              fetch(`/track?orderCode=<%= order.orderCode %>&contactInfo=<%= typeof queryContactInfo !== 'undefined' ? queryContactInfo : '' %>&ajax=1`)
+                .then(res => res.json())
+                .then(data => {
+                  if (data && data.status && data.status !== 'PENDING_PAYMENT') {
+                    window.location.reload();
+                  }
+                })
+                .catch(err => console.error('Polling error', err));
+            }, 3000);
+          </script>
         </div>
 
       <% } else if (order.status === 'FAILED_STOCK') { %>

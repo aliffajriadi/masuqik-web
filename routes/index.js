@@ -70,6 +70,7 @@ router.get('/track', async (req, res, next) => {
     const result = await trackOrder(orderCode, contactInfo);
 
     if (!result) {
+      if (req.query.ajax) return res.status(404).json({ error: 'Not found' });
       return res.render('track', {
         title: 'Cek Transaksi — Masuqik Store',
         activePage: 'track',
@@ -80,6 +81,7 @@ router.get('/track', async (req, res, next) => {
     }
 
     if (result.unauthorized) {
+      if (req.query.ajax) return res.status(401).json({ error: 'Unauthorized' });
       return res.render('track', {
         title: 'Cek Transaksi — Masuqik Store',
         activePage: 'track',
@@ -87,6 +89,10 @@ router.get('/track', async (req, res, next) => {
         queryContactInfo: contactInfo,
         error: 'Verifikasi email/kontak tidak cocok.'
       });
+    }
+
+    if (req.query.ajax) {
+      return res.json({ status: result.status });
     }
 
     res.render('track', {

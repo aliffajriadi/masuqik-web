@@ -1,14 +1,35 @@
+<div style="margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+  <h2 style="font-size: 1.2rem; font-weight: 700;">Ringkasan Data</h2>
+  <form action="/admin/dashboard" method="GET" style="display: flex; gap: 0.5rem; align-items: center;">
+    <label for="month" style="font-size: 0.9rem; font-weight: 600; color: var(--text-muted);">Periode:</label>
+    <input type="month" id="month" name="month" value="<%= monthFilter || new Date().toISOString().substring(0,7) %>" style="padding: 0.4rem 0.8rem; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--bg-card); color: var(--text-main); outline: none;" onchange="this.form.submit()">
+  </form>
+</div>
+
 <div class="stat-card-grid">
+  <div class="stat-card" style="border-color: rgba(5, 150, 105, 0.3);">
+    <div class="stat-label">Omset (Bulan Terpilih)</div>
+    <div class="stat-value" style="color: #059669;">Rp <%= stats.monthlyRevenue.toLocaleString('id-ID') %></div>
+  </div>
+  <div class="stat-card" style="border-color: rgba(0, 194, 224, 0.3);">
+    <div class="stat-label">Pesanan (Bulan Terpilih)</div>
+    <div class="stat-value"><%= stats.monthlyOrders %></div>
+  </div>
+  <div class="stat-card" style="border-color: rgba(0, 194, 224, 0.3);">
+    <div class="stat-label">Sukses (Bulan Terpilih)</div>
+    <div class="stat-value" style="color: var(--primary);"><%= stats.monthlyCompletedOrders %></div>
+  </div>
+  
   <div class="stat-card">
-    <div class="stat-label">Total Omset (COMPLETED)</div>
-    <div class="stat-value" style="color: #059669;">Rp <%= stats.totalRevenue.toLocaleString('id-ID') %></div>
+    <div class="stat-label">Total Omset (Keseluruhan)</div>
+    <div class="stat-value" style="color: var(--primary);">Rp <%= stats.totalRevenue.toLocaleString('id-ID') %></div>
   </div>
   <div class="stat-card">
-    <div class="stat-label">Total Pesanan</div>
+    <div class="stat-label">Total Pesanan (Semua)</div>
     <div class="stat-value"><%= stats.totalOrders %></div>
   </div>
   <div class="stat-card">
-    <div class="stat-label">Pesanan Sukses</div>
+    <div class="stat-label">Pesanan Sukses (Semua)</div>
     <div class="stat-value" style="color: var(--primary);"><%= stats.completedOrders %></div>
   </div>
   <div class="stat-card">

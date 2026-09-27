@@ -3,8 +3,24 @@ import prisma from '../lib/prisma.js';
 /**
  * Calculate dashboard summary statistics
  */
-export async function getDashboardStats() {
-  const [totalOrders, completedOrders, pendingOrders, totalProducts, totalUsers, revenueResult] = await Promise.all([
+export async function getDashboardStats(monthFilter) {
+  let startOfMonth = new Date();
+  let endOfMonth = new Date();
+
+  if (monthFilter) {
+    const [year, month] = monthFilter.split('-');
+    startOfMonth = new Date(year, parseInt(month) - 1, 1);
+    endOfMonth = new Date(year, parseInt(month), 0, 23, 59, 59, 999);
+  } else {
+    startOfMonth.setDate(1);
+    startOfMonth.setHours(0, 0, 0, 0);
+    endOfMonth = new Date(startOfMonth.getFullYear(), startOfMonth.getMonth() + 1, 0, 23, 59, 59, 999);
+  }
+
+  const [
+    totalOrders, completedOrders, pendingOrders, totalProducts, totalUsers, revenueResult,
+    monthlyRevenueResult, monthlyOrders, monthlyCompletedOrders
+  ] = await Promise.all([
     prisma.order.count(),
     prisma.order.count({ where: { status: 'COMPLETED' } }),
     prisma.order.count({ where: { status: 'PENDING_PAYMENT' } }),
@@ -13,10 +29,24 @@ export async function getDashboardStats() {
     prisma.order.aggregate({
       _sum: { totalAmount: true },
       where: { status: 'COMPLETED' }
+    }),
+    prisma.order.aggregate({
+      _sum: { totalAmount: true },
+      where: {
+        status: 'COMPLETED',
+        createdAt: { gte: startOfMonth, lte: endOfMonth }
+      }
+    }),
+    prisma.order.count({
+      where: { createdAt: { gte: startOfMonth, lte: endOfMonth } }
+    }),
+    prisma.order.count({
+      where: { status: 'COMPLETED', createdAt: { gte: startOfMonth, lte: endOfMonth } }
     })
   ]);
 
   const totalRevenue = revenueResult._sum.totalAmount || 0;
+  const monthlyRevenue = monthlyRevenueResult._sum.totalAmount || 0;
 
   // Recent 5 transactions
   const recentOrders = await prisma.order.findMany({
@@ -32,6 +62,9 @@ export async function getDashboardStats() {
     totalProducts,
     totalUsers,
     totalRevenue,
+    monthlyRevenue,
+    monthlyOrders,
+    monthlyCompletedOrders,
     recentOrders
   };
 }

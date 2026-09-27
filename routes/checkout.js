@@ -13,7 +13,7 @@ router.post('/', async (req, res, next) => {
     }
 
     const prisma = (await import('../lib/prisma.js')).default;
-    
+
     if (req.session.activeOrderCode) {
       const activeOrder = await prisma.order.findUnique({
         where: { orderCode: req.session.activeOrderCode }

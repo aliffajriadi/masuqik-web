@@ -37,18 +37,7 @@
       </div>
     <% } %>
 
-    <!-- Search Bar -->
-    <div class="search-wrapper" style="max-width: 640px;">
-      <form action="/" method="GET">
-        <input type="text" name="search" class="search-input"
-               id="heroSearch"
-               placeholder="Cari proxy, voucher, top-up..."
-               value="<%= typeof searchQuery !== 'undefined' ? searchQuery : '' %>">
-        <button type="submit" class="search-btn" aria-label="Cari">
-          <i data-lucide="search" style="width:18px;height:18px;"></i>
-        </button>
-      </form>
-    </div>
+
 
   </div>
 
@@ -74,8 +63,8 @@
 
     <div class="catalog-grid" style="padding-bottom: 1rem;">
       <% popularProducts.forEach(prod => { %>
-        <a href="/product/<%= prod.id %>" style="text-decoration:none; color:inherit; display:block;">
-        <div class="product-card" style="border-color: rgba(255,107,53,0.2);">
+        <a href="/product/<%= prod.id %>" style="text-decoration:none; color:inherit; display:block; height:100%;">
+        <div class="product-card" style="border-color: rgba(255,107,53,0.2); height:100%;">
           <div class="card-image-wrap">
             <% if (prod.thumbnail) { %>
               <img src="<%= prod.thumbnail %>" alt="<%= prod.name %>">
@@ -131,7 +120,7 @@
 
   <div class="category-tabs">
     <% categories.forEach(cat => { %>
-      <a href="/?category=<%= cat %><%= typeof searchQuery !== 'undefined' && searchQuery ? '&search=' + searchQuery : '' %>"
+      <a href="/?category=<%= cat %>"
          class="tab-item <%= activeCategory === cat ? 'active' : '' %>">
         <%= cat === 'ALL' ? 'Semua Produk' : cat %>
       </a>
@@ -144,7 +133,7 @@
         <i data-lucide="inbox" style="width:36px;height:36px;"></i>
       </div>
       <h3>Produk tidak ditemukan</h3>
-      <p style="margin-top:0.4rem;">Coba kata kunci lain atau pilih kategori yang berbeda.</p>
+      <p style="margin-top:0.4rem;">Pilih kategori yang berbeda atau cek kembali nanti.</p>
       <a href="/" class="btn-pill btn-ghost" style="margin-top: 1.5rem;">
         <i data-lucide="arrow-left" style="width:14px;height:14px;"></i> Lihat Semua
       </a>
@@ -152,8 +141,8 @@
   <% } else { %>
     <div class="catalog-grid">
       <% products.forEach(prod => { %>
-        <a href="/product/<%= prod.id %>" style="text-decoration:none; color:inherit; display:block;">
-        <div class="product-card">
+        <a href="/product/<%= prod.id %>" style="text-decoration:none; color:inherit; display:block; height:100%;">
+        <div class="product-card" style="height:100%;">
           <div class="card-image-wrap">
             <% if (prod.thumbnail) { %>
               <img src="<%= prod.thumbnail %>" alt="<%= prod.name %>">

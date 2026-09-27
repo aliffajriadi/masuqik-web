@@ -165,7 +165,7 @@ img { max-width: 100%; }
   font-size: 1.3rem;
   letter-spacing: -0.5px;
   color: var(--text-main);
-  flex-shrink: 0;
+  flex: 1;
 }
 
 .brand-icon {
@@ -216,6 +216,8 @@ img { max-width: 100%; }
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  flex: 1;
+  justify-content: flex-end;
 }
 
 /* ===== THEME TOGGLE ===== */

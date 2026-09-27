@@ -69,13 +69,15 @@ router.use(requireAdmin);
 // GET /admin/dashboard
 router.get('/dashboard', async (req, res, next) => {
   try {
-    const stats = await getDashboardStats();
+    const monthFilter = req.query.month || '';
+    const stats = await getDashboardStats(monthFilter);
     res.render('admin/dashboard', {
       title: 'Dashboard Statistik',
       pageTitle: 'Dashboard Statistik',
       activeTab: 'dashboard',
       layout: 'admin/layout',
-      stats
+      stats,
+      monthFilter
     });
   } catch (err) { next(err); }
 });
